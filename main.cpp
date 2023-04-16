@@ -1,24 +1,26 @@
 #include "wholeinclude_orientation_visualizer.h"
 
+//#include "logic_data.h"
+//#include "Benchmark.h"
 
 #include "Serial.h"
-#include "Graphics.h"
-#include "logic_data.h"
-#include "Benchmark.h"
 
 
 
 void logic_handler(boost::asio::io_service& io, boost::asio::serial_port& port)
 {
-	logic_data* _logic_data;
-	//char buffer[16] = "~12 11 10 9 8 7";
-	//char* p_buffer = buffer;
-	//size_t size = 16;
+	logic_data* _logic_data = new logic_data();
+	char buffer[16] = "~12 11 10 9 8 7";
+	char* p_buffer = buffer;
+	size_t size = 16;
 	{
-		AutoDrones::readSerial(io, port, _logic_data);
+		AutoDrones::interpretData(size, buffer, _logic_data);
+		//AutoDrones::readSerial(io, port, _logic_data);
 	}
 
 	_logic_data->print();
+
+	delete(_logic_data);
 	std::cin.ignore();
 	//delete(_logic_data);
 }
@@ -51,13 +53,6 @@ int main(int argc, char** argv)
 	}
 
 
-	//AutoDrones_Graphics::init_GLFW_GLEW(window, argc, argv);
-	
-	//while (true)
-	//	AutoDrones_Graphics::drawRectangle(window);
-
-	//glfwDestroyWindow(window);
-	//glfwTerminate();
 
 	std::cout << std::endl << std::endl << "END";
 	std::cin.ignore();

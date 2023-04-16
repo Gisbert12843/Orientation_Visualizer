@@ -1,5 +1,6 @@
 #pragma once
-#include "wholeinclude_orientation_visualizer.h"
+#include <iostream>
+#include <string>
 
 //this represents the Orientation of the SerialDevice taken that it provides its SensorData to the Softwares
 class logic_data

@@ -1,9 +1,6 @@
 #include "Serial.h"
-#include "Benchmark.h"
-#include "logic_data.h"
 
-//this interprets the buffer data into a logic_data object which is then returned as a pointer
-logic_data* AutoDrones::interpretData(std::size_t bytes_transferred,char* buffer)
+logic_data* AutoDrones::interpretData(std::size_t bytes_transferred,char* buffer, logic_data* _logic_data)
 {
 	AutoDrones::Benchmark benchmark;
 	try {
@@ -32,7 +29,6 @@ logic_data* AutoDrones::interpretData(std::size_t bytes_transferred,char* buffer
 
 		//creates a new logic_data object using the intrepeted data
 		{
-			logic_data* _logic_data = new logic_data;
 
 			_logic_data->setGyroX(vec_logic_data[0]);
 			_logic_data->setGyroY(vec_logic_data[1]);
@@ -53,7 +49,6 @@ logic_data* AutoDrones::interpretData(std::size_t bytes_transferred,char* buffer
 	}
 }
 
-//this updates the console screen with the updated data from the buffer, totally flicker free and does support user moving of the cursor
 void AutoDrones::print_screen(std::size_t bytes_transferred, char* buffer)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -93,7 +88,6 @@ void AutoDrones::print_screen(std::size_t bytes_transferred, char* buffer)
 	std::cout.flush();
 }
 
-//this continously reads data from the serialport into a buffer and prints it to the console
 void AutoDrones::handle_read(const boost::system::error_code& error, std::size_t bytes_transferred, char* buffer, boost::asio::serial_port& serial_port, logic_data* _logic_data)
 {
 
@@ -101,14 +95,13 @@ void AutoDrones::handle_read(const boost::system::error_code& error, std::size_t
 		AutoDrones::Benchmark();
 		//prints recieved data to screen in a non flickering way
 
-		_logic_data = AutoDrones::interpretData(bytes_transferred, buffer);
+		_logic_data = AutoDrones::interpretData(bytes_transferred, buffer, _logic_data);
 
 		//AutoDrones::print_screen(bytes_transferred, buffer);
 
 		// Call async_read again to continue reading data
 		boost::asio::async_read(serial_port, boost::asio::mutable_buffers_1(buffer, 2048), boost::asio::transfer_at_least(1),
-			boost::bind(handle_read, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, buffer, boost::ref(serial_port)));
-
+			boost::bind(handle_read, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, buffer, boost::ref(serial_port),_logic_data));
 	}
 	else
 	{
@@ -117,7 +110,6 @@ void AutoDrones::handle_read(const boost::system::error_code& error, std::size_t
 	}
 }
 
-//this initiates the reading of data from the serialport into a buffer, continued by the handle_read() function
 void AutoDrones::readSerial(boost::asio::io_service& io, boost::asio::serial_port& serialport, logic_data* _logic_data)
 {
 	//std::cout << "called readSerial()\n";
